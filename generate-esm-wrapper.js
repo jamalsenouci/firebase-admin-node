@@ -37,8 +37,23 @@ async function generateEsmWrapper(entryPoint, source) {
   await fs.mkdir(path.dirname(target), { recursive: true });
   await fs.writeFile(target, output);
   await fs.writeFile('./lib/esm/package.json', JSON.stringify({type: 'module'}));
+  copyTypings(source)
 }
 
+function copyTypings(source) {
+  
+  const sourceDir = source.replace('index.js', '')
+  console.log(sourceDir)
+  fs.readdir(sourceDir, (err, files) => {
+    files.forEach(file => {
+      if (file.endsWith('.d.ts')){
+        src = `${sourceDir}/${file}`
+        dest = src.replace('./lib', './lib/esm')
+        fs.copyFileSync(src, dest);
+      }
+    });
+  });
+}
 function getTarget(entryPoint) {
   const child = entryPoint.replace('firebase-admin/', '');
   return `./lib/esm/${child}/index.js`;
